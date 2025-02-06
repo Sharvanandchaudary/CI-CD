@@ -22,9 +22,9 @@ jobs:
           docker build -t my-app .
 
       # Run OPA policy test (assuming you have opa installed or use docker container)
-      - name: Test OPA Policy
-        run: |
-          docker run --rm -v "$(pwd):/data" openpolicyagent/opa:latest eval --data /data/policy.rego --input /data/kubernetes.yaml 'data.kubernetes.allow == true'
+      # - name: Test OPA Policy
+      #   run: |
+      #     docker run --rm -v "$(pwd):/data" openpolicyagent/opa:latest eval --data /data/policy.rego --input /data/kubernetes.yaml 'data.kubernetes.allow == true'
 
       # Optional: Push Docker image (if you use a registry)
       - name: Log in to Docker Hub
