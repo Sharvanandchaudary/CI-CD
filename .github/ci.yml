@@ -1,0 +1,57 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t my-app .
+
+      # Run OPA policy test (assuming you have opa installed or use docker container)
+      - name: Test OPA Policy
+        run: |
+          docker run --rm -v "$(pwd):/data" openpolicyagent/opa:latest eval --data /data/policy.rego --input /data/kubernetes.yaml 'data.kubernetes.allow == true'
+
+      # Optional: Push Docker image (if you use a registry)
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push Docker image
+        run: |
+          docker tag my-app yourdockerhubusername/my-app:latest
+          docker push yourdockerhubusername/my-app:latest
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Deploy to Kubernetes (adjust the command as needed)
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.32.0'
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f kubernetes.yaml
