@@ -23,14 +23,15 @@ jobs:
       - name: Cache Docker layers
         uses: actions/cache@v3  # Cache Docker layers to speed up builds
         with:
-          path: /tmp/.buildx-cache
+          path: ~/.buildx-cache  # Use the default Docker cache directory
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-  # Use cache key with GitHub SHA for cache invalidation
 
       - name: Build Docker image
         run: |
-          docker buildx build --cache-from=type=local,source=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache --tag my-app --load .  # Build Docker image with caching
+          mkdir -p ~/.buildx-cache  # Ensure the cache directory exists
+          docker buildx build --cache-from=type=local,source=~/.buildx-cache --cache-to=type=local,dest=~/.buildx-cache --tag my-app --load .  # Build Docker image with caching
 
       # Optional: Push Docker image to Docker Hub (if you're using a registry)
       - name: Log in to Docker Hub
