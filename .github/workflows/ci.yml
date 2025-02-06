@@ -30,7 +30,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker buildx build --cache-from=type=local,source=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache --tag my-app .
+          docker buildx build --cache-from=type=local,source=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache --tag my-app --load .
+
 
       # Optional: Push Docker image (if you use a registry)
       - name: Log in to Docker Hub
