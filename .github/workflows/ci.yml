@@ -1,64 +1,64 @@
 name: CI/CD Pipeline
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch: {}  # Manually trigger the workflow
   push:
     branches:
-      - master
+      - master  # Trigger on push to master
   pull_request:
     branches:
-      - master
+      - master  # Trigger on pull request to master
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Runs on the latest Ubuntu
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3  # Check out the repository
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v2  # Set up Docker Buildx for multi-platform builds
 
       - name: Cache Docker layers
-        uses: actions/cache@v3
+        uses: actions/cache@v3  # Cache Docker layers to speed up builds
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-  # Use cache key with GitHub SHA for cache invalidation
 
       - name: Build Docker image
         run: |
-          docker buildx build --cache-from=type=local,source=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache --tag my-app --load .
+          docker buildx build --cache-from=type=local,source=/tmp/.buildx-cache --cache-to=type=local,dest=/tmp/.buildx-cache --tag my-app --load .  # Build Docker image with caching
 
-
-      # Optional: Push Docker image (if you use a registry)
+      # Optional: Push Docker image to Docker Hub (if you're using a registry)
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: ${{ secrets.DOCKER_PASSWORD }}  # Retrieve Docker Hub credentials from GitHub secrets
 
       - name: Push Docker image
         run: |
-          docker tag my-app sharvanand/my-app:latest
-          docker push sharvanand/my-app:latest
+          docker tag my-app sharvanand/my-app:latest  # Tag image for Docker Hub
+          docker push sharvanand/my-app:latest  # Push the image to Docker Hub
 
   deploy:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    needs: build-and-test  # This job runs after the build-and-test job
+    runs-on: ubuntu-latest  # Runs on the latest Ubuntu
+    if: github.ref == 'refs/heads/master'  # Only deploy when the branch is master
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3  # Checkout the repository again
 
-      # Deploy to Kubernetes (adjust the command as needed)
+      # Set up kubectl (Kubernetes CLI)
       - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v3  # Setup kubectl for managing Kubernetes
         with:
-          version: 'v1.32.0'
+          version: 'v1.32.0'  # Set the version of kubectl you want to use
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f kubernetes.yaml
+          kubectl apply -f kubernetes.yaml  # Deploy application using kubectl
