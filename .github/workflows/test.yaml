@@ -1,0 +1,44 @@
+name: My Workflow
+
+on:
+  # Trigger on push to specific branches
+  push:
+    branches:
+      - main        # Replace with the branch you want to trigger on (e.g., main, develop, feature/*)
+      - develop     # Add more branches if needed
+
+  # Trigger on pull request creation or updates
+  pull_request:
+    branches:
+      - main        # Replace with the branch you want to target for PRs (e.g., main, develop)
+
+  # Optional: Trigger on a schedule (daily at midnight UTC)
+  schedule:
+    - cron: '0 0 * * *'  # Adjust this cron schedule as per your needs (e.g., weekly, monthly)
+
+  # Manually trigger the workflow
+  workflow_dispatch:
+
+jobs:
+  my-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Run Tests (Java)
+        run: mvn test  # Executes Maven test command
+      
+      - name: Set API key
+        run: echo "API_KEY=${{ secrets.API_KEY }}" >> $GITHUB_ENV
+
+      - name: Run a script
+        run: echo "Hello, GitHub Actions!"
+
+      # Add your testing step here if required
+      # - name: Run Tests (Node.js)
+      #   run: npm test
+
+      # Use secrets for sensitive data
+      # - name: Set up API Key
+      #   run: echo "API_KEY=${{ secrets.MY_API_KEY }}" >> $GITHUB_ENV
